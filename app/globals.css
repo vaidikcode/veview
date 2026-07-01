@@ -1,0 +1,280 @@
+@import "tailwindcss";
+@import "../styles/transitions.css";
+
+:root {
+  --bg: #07070a;
+  --bg-elev: #101017;
+  --bg-panel: #0c0c12;
+  --fg: #f4f2ea;
+  --fg-dim: #9d9a90;
+  --muted: #7c7a72;
+  --border: rgba(244, 242, 234, 0.1);
+  --border-strong: rgba(244, 242, 234, 0.18);
+  --accent: #ff6a2c;
+  --accent-2: #7b6cff;
+  --accent-3: #14d1a3;
+  --danger: #ff5a52;
+
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card: var(--bg-panel);
+  --card-foreground: var(--fg);
+  --primary: var(--fg);
+  --primary-foreground: #07070a;
+  --secondary: var(--bg-elev);
+  --secondary-foreground: var(--fg);
+  --muted-foreground: var(--muted);
+  --accent-foreground: var(--fg);
+  --destructive: var(--danger);
+  --destructive-foreground: #07070a;
+  --ring: var(--accent);
+  --surface: var(--bg-elev);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--secondary);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-3: var(--accent-3);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-surface: var(--surface);
+  --color-fg-dim: var(--fg-dim);
+  --font-sans: var(--font-plex-sans);
+  --font-display: var(--font-bricolage);
+  --font-mono: var(--font-plex-mono);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  color-scheme: dark;
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+::selection {
+  background: var(--accent);
+  color: #07070a;
+}
+
+/* Film grain overlay */
+body::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: -50%;
+  z-index: 9998;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 6s steps(6) infinite;
+}
+
+@keyframes grain {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-4%, 3%);
+  }
+  40% {
+    transform: translate(3%, -4%);
+  }
+  60% {
+    transform: translate(-3%, -2%);
+  }
+  80% {
+    transform: translate(2%, 4%);
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 3px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Custom cursor */
+@media (hover: hover) and (pointer: fine) {
+  .cursor-active,
+  .cursor-active * {
+    cursor: none;
+  }
+}
+
+.cursor-dot,
+.cursor-ring {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  border-radius: 999px;
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  transition:
+    width 0.2s ease,
+    height 0.2s ease;
+}
+.cursor-ring {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  transition:
+    width 0.25s ease,
+    height 0.25s ease,
+    opacity 0.25s ease;
+}
+.cursor-hover .cursor-ring {
+  width: 64px;
+  height: 64px;
+}
+.cursor-hover .cursor-dot {
+  width: 4px;
+  height: 4px;
+}
+
+/* Utilities */
+.text-gradient {
+  background: linear-gradient(
+    100deg,
+    var(--fg) 20%,
+    var(--accent) 60%,
+    var(--accent-2) 90%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glass {
+  background: color-mix(in oklab, var(--bg-panel) 78%, transparent);
+  backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--border);
+}
+
+.glow-ring {
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 0 40px -12px color-mix(in oklab, var(--accent) 55%, transparent);
+}
+
+.hairline-grid {
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 78%);
+}
+
+/* Marquee */
+.marquee {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  gap: 0;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee__track {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  min-width: 100%;
+  animation: marquee 32s linear infinite;
+}
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+
+/* Kinetic reveal for split words */
+.rise {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.9em) rotate(3deg);
+  animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--rise-delay, 0ms);
+}
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
+
+/* Clerk dark polish */
+.cl-modalBackdrop,
+.cl-modalContent {
+  transition:
+    opacity var(--modal-open-dur) var(--modal-ease),
+    transform var(--modal-open-dur) var(--modal-ease) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    animation: none;
+  }
+  .rise {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .marquee__track {
+    animation: none;
+  }
+}

@@ -1,0 +1,104 @@
+/* transitions.dev — universal install + modal (06-modal) */
+
+:root {
+  --modal-open-dur: 250ms;
+  --modal-close-dur: 150ms;
+  --modal-scale: 0.96;
+  --modal-scale-close: 0.96;
+  --modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dropdown-open-dur: 250ms;
+  --dropdown-close-dur: 150ms;
+  --dropdown-pre-scale: 0.97;
+  --dropdown-closing-scale: 0.99;
+  --dropdown-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --reveal-dur: 600ms;
+  --reveal-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --reveal-distance: 12px;
+}
+
+/* Modal overlay */
+.t-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(17, 17, 17, 0.32);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity var(--modal-open-dur) var(--modal-ease);
+}
+
+.t-modal-overlay[data-state="open"] {
+  opacity: 1;
+}
+
+.t-modal-overlay[data-state="closed"] {
+  opacity: 0;
+  transition-duration: var(--modal-close-dur);
+}
+
+/* Modal content */
+.t-modal-content {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 51;
+  width: calc(100% - 2rem);
+  max-width: 28rem;
+  translate: -50% -50%;
+  opacity: 0;
+  scale: var(--modal-scale);
+  will-change: transform, opacity;
+  transition:
+    scale var(--modal-open-dur) var(--modal-ease),
+    opacity var(--modal-open-dur) var(--modal-ease);
+}
+
+.t-modal-content[data-state="open"] {
+  opacity: 1;
+  scale: 1;
+}
+
+.t-modal-content[data-state="closed"] {
+  opacity: 0;
+  scale: var(--modal-scale-close);
+  transition-duration: var(--modal-close-dur);
+}
+
+/* Scroll reveal */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(22px);
+  filter: blur(6px);
+  transition:
+    opacity var(--reveal-dur) var(--reveal-ease),
+    transform var(--reveal-dur) var(--reveal-ease),
+    filter var(--reveal-dur) var(--reveal-ease);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-modal-overlay,
+  .t-modal-content {
+    transition: none !important;
+  }
+
+  .t-modal-overlay[data-state="open"],
+  .t-modal-content[data-state="open"] {
+    opacity: 1;
+    scale: 1;
+  }
+
+  .reveal-on-scroll {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
