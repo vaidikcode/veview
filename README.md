@@ -81,21 +81,36 @@ See [docs/PRD.md](docs/PRD.md) for the full roadmap.
 
 ## Deployment
 
-### Vercel
+### Vercel + Convex (automatic on `main`)
 
-1. Connect repository
-2. Set env vars from `.env.example`
-3. Deploy
+Schema and function changes under `convex/` deploy to **production Convex** whenever Vercel builds **production** (push to `main`).
 
-### Convex production
+1. Connect the repo to Vercel.
+2. Set app env vars from `.env.example` (`NEXT_PUBLIC_CONVEX_URL` must be the **prod** URL).
+3. Add **`CONVEX_DEPLOY_KEY`** (Convex Dashboard → Project Settings → Deploy Keys → **Production**).
+4. Build command is already set in `vercel.json` → `scripts/vercel-build.sh`:
+   - Production: `npx convex deploy --cmd 'npm run build'` (pushes schema/tables/functions, then builds Next)
+   - Preview: `npm run build` only (does not touch prod Convex)
 
-After testing locally:
+There is also a GitHub Action (`.github/workflows/deploy-convex.yml`) that deploys Convex when `convex/**` changes on `main`. Add the same `CONVEX_DEPLOY_KEY` as a GitHub Actions secret.
+
+### What auto-deploys vs what does not
+
+| Change                                                 | Auto on prod deploy?                                                    |
+| ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| New tables, indexes, optional fields in `schema.ts`    | Yes — `convex deploy`                                                   |
+| New/updated queries, mutations, actions                | Yes                                                                     |
+| Data backfills / clearing old fields (`migrations.ts`) | **No** — run once after deploy: `npx convex run migrations:name --prod` |
+
+Use `npx convex dev` locally. Use `npx convex deploy` (or the Vercel/GitHub path above) only for production.
+
+### Manual Convex production deploy
 
 ```bash
 npx convex deploy
+# optional data migration after schema is live:
+npx convex run migrations:migrateLegacyProjectMedia --prod
 ```
-
-Use `npx convex deploy` only for production — use `npx convex dev` during development.
 
 ## License
 
