@@ -13,6 +13,7 @@ import type * as files from "../files.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_customFunctions from "../lib/customFunctions.js";
 import type * as lib_projects from "../lib/projects.js";
+import type * as migrations from "../migrations.js";
 import type * as projects from "../projects.js";
 import type * as review from "../review.js";
 import type * as users from "../users.js";
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   "lib/auth": typeof lib_auth;
   "lib/customFunctions": typeof lib_customFunctions;
   "lib/projects": typeof lib_projects;
+  migrations: typeof migrations;
   projects: typeof projects;
   review: typeof review;
   users: typeof users;

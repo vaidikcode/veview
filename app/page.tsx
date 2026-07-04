@@ -68,19 +68,21 @@ export default async function HomePage() {
         <SiteHeader />
 
         {/* HERO */}
-        <section className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-5 pt-28 pb-16">
+        <section className="relative flex min-h-[100svh] flex-col justify-center px-5 pt-28 pb-16">
           <div className="relative mx-auto w-full max-w-5xl">
             <div className="mb-6 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.2em] text-fg-dim">
               <span className="h-px w-8 bg-border-strong" />
               The review room for people who make things move
             </div>
 
-            <h1 className="font-display text-[clamp(2.9rem,9vw,7rem)] leading-[0.92]">
+            <h1 className="font-display text-[clamp(2.4rem,7.5vw,6.5rem)] leading-[0.95]">
               <KineticText text="Feedback that" />
               <br />
-              <span className="text-gradient">
-                <KineticText text="hits the frame." startDelay={520} />
-              </span>
+              <KineticText
+                text="hits the frame."
+                startDelay={520}
+                charClassName="text-gradient"
+              />
             </h1>
 
             <p className="mt-7 max-w-xl text-lg text-fg-dim">

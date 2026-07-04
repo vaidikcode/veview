@@ -6,6 +6,7 @@ import { assertProjectOwner, getProjectByShareToken } from "./lib/projects";
 export const addCreatorComment = authedMutation({
   args: {
     projectId: v.id("projects"),
+    mediaItemId: v.id("mediaItems"),
     text: v.string(),
     timestampSeconds: v.optional(v.number()),
     pinX: v.optional(v.number()),
@@ -18,11 +19,17 @@ export const addCreatorComment = authedMutation({
 
     await assertProjectOwner(project, ctx.user._id);
 
+    const mediaItem = await ctx.db.get("mediaItems", args.mediaItemId);
+    if (!mediaItem || mediaItem.projectId !== args.projectId) {
+      throw new Error("Media not found in this project");
+    }
+
     const text = args.text.trim();
     if (text.length === 0) throw new Error("Comment cannot be empty");
 
     return await ctx.db.insert("comments", {
       projectId: args.projectId,
+      mediaItemId: args.mediaItemId,
       text,
       timestampSeconds: args.timestampSeconds,
       pinX: args.pinX,
@@ -38,6 +45,7 @@ export const addCreatorComment = authedMutation({
 export const addGuestComment = mutation({
   args: {
     shareToken: v.string(),
+    mediaItemId: v.id("mediaItems"),
     text: v.string(),
     displayName: v.string(),
     timestampSeconds: v.optional(v.number()),
@@ -49,6 +57,11 @@ export const addGuestComment = mutation({
     const project = await getProjectByShareToken(ctx, args.shareToken);
     if (!project) throw new Error("Invalid or expired review link");
 
+    const mediaItem = await ctx.db.get("mediaItems", args.mediaItemId);
+    if (!mediaItem || mediaItem.projectId !== project._id) {
+      throw new Error("Media not found in this project");
+    }
+
     const text = args.text.trim();
     const displayName = args.displayName.trim();
 
@@ -57,6 +70,7 @@ export const addGuestComment = mutation({
 
     return await ctx.db.insert("comments", {
       projectId: project._id,
+      mediaItemId: args.mediaItemId,
       text,
       timestampSeconds: args.timestampSeconds,
       pinX: args.pinX,

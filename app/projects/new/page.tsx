@@ -46,9 +46,13 @@ export default function NewProjectPage() {
       <EnsureUser>
         <div className="mx-auto max-w-lg px-5 py-16">
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-accent">
-            New review room
+            New folder
           </p>
-          <h1 className="mt-2 font-display text-4xl">Start a project</h1>
+          <h1 className="mt-2 font-display text-4xl">Create a project</h1>
+          <p className="mt-2 text-sm text-fg-dim">
+            Projects are folders. You&apos;ll add media with names and descriptions
+            next.
+          </p>
 
           <form
             className="mt-10 space-y-6"
@@ -88,7 +92,7 @@ export default function NewProjectPage() {
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" variant="accent" disabled={loading}>
-              {loading ? "Creating…" : "Create project →"}
+              {loading ? "Creating…" : "Create folder →"}
             </Button>
           </form>
         </div>

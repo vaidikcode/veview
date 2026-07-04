@@ -2,11 +2,7 @@ import { v } from "convex/values";
 import { nanoid } from "nanoid";
 import { authedMutation, authedQuery } from "./lib/customFunctions";
 import { assertProjectOwner } from "./lib/projects";
-import {
-  mediaStatusValidator,
-  mediaTypeValidator,
-  projectStatusValidator,
-} from "./schema";
+import { projectStatusValidator } from "./schema";
 
 const projectSummaryValidator = v.object({
   _id: v.id("projects"),
@@ -14,9 +10,39 @@ const projectSummaryValidator = v.object({
   description: v.optional(v.string()),
   shareToken: v.string(),
   status: projectStatusValidator,
-  mediaType: v.optional(mediaTypeValidator),
-  mediaStatus: v.optional(mediaStatusValidator),
+  mediaCount: v.number(),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+const mediaItemValidator = v.object({
+  _id: v.id("mediaItems"),
+  title: v.string(),
+  description: v.optional(v.string()),
+  mediaType: v.optional(
+    v.union(
+      v.literal("video"),
+      v.literal("image"),
+      v.literal("audio"),
+      v.literal("file"),
+    ),
+  ),
+  mediaStatus: v.union(v.literal("uploading"), v.literal("ready"), v.literal("failed")),
+  contentType: v.optional(v.string()),
+  fileName: v.optional(v.string()),
+  fileSizeBytes: v.optional(v.number()),
   mediaUrl: v.union(v.string(), v.null()),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+const projectDetailValidator = v.object({
+  _id: v.id("projects"),
+  title: v.string(),
+  description: v.optional(v.string()),
+  shareToken: v.string(),
+  status: projectStatusValidator,
+  mediaItems: v.array(mediaItemValidator),
   createdAt: v.number(),
   updatedAt: v.number(),
 });
@@ -32,32 +58,57 @@ export const list = authedQuery({
       .collect();
 
     return await Promise.all(
-      projects.map(async (project) => ({
-        _id: project._id,
-        title: project.title,
-        description: project.description,
-        shareToken: project.shareToken,
-        status: project.status,
-        mediaType: project.mediaType,
-        mediaStatus: project.mediaStatus,
-        mediaUrl: project.mediaStorageId
-          ? await ctx.storage.getUrl(project.mediaStorageId)
-          : null,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-      })),
+      projects.map(async (project) => {
+        const items = await ctx.db
+          .query("mediaItems")
+          .withIndex("by_project", (q) => q.eq("projectId", project._id))
+          .collect();
+
+        return {
+          _id: project._id,
+          title: project.title,
+          description: project.description,
+          shareToken: project.shareToken,
+          status: project.status,
+          mediaCount: items.length,
+          createdAt: project.createdAt,
+          updatedAt: project.updatedAt,
+        };
+      }),
     );
   },
 });
 
 export const get = authedQuery({
   args: { projectId: v.id("projects") },
-  returns: v.union(projectSummaryValidator, v.null()),
+  returns: v.union(projectDetailValidator, v.null()),
   handler: async (ctx, args) => {
     const project = await ctx.db.get("projects", args.projectId);
     if (!project) return null;
 
     await assertProjectOwner(project, ctx.user._id);
+
+    const items = await ctx.db
+      .query("mediaItems")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .order("desc")
+      .collect();
+
+    const mediaItems = await Promise.all(
+      items.map(async (item) => ({
+        _id: item._id,
+        title: item.title,
+        description: item.description,
+        mediaType: item.mediaType,
+        mediaStatus: item.mediaStatus,
+        contentType: item.contentType,
+        fileName: item.fileName,
+        fileSizeBytes: item.fileSizeBytes,
+        mediaUrl: item.storageId ? await ctx.storage.getUrl(item.storageId) : null,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      })),
+    );
 
     return {
       _id: project._id,
@@ -65,11 +116,7 @@ export const get = authedQuery({
       description: project.description,
       shareToken: project.shareToken,
       status: project.status,
-      mediaType: project.mediaType,
-      mediaStatus: project.mediaStatus,
-      mediaUrl: project.mediaStorageId
-        ? await ctx.storage.getUrl(project.mediaStorageId)
-        : null,
+      mediaItems,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
     };
@@ -156,8 +203,16 @@ export const remove = authedMutation({
       await ctx.db.delete("comments", comment._id);
     }
 
-    if (project.mediaStorageId) {
-      await ctx.storage.delete(project.mediaStorageId);
+    const items = await ctx.db
+      .query("mediaItems")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    for (const item of items) {
+      if (item.storageId) {
+        await ctx.storage.delete(item.storageId);
+      }
+      await ctx.db.delete("mediaItems", item._id);
     }
 
     await ctx.db.delete("projects", args.projectId);

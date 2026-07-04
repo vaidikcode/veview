@@ -16,26 +16,6 @@ const statusMap = {
   approved: { label: "Approved", variant: "approved" as const },
 };
 
-function Thumb({ url, type }: { url: string | null; type?: "video" | "image" }) {
-  if (url) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={url}
-        alt=""
-        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-      />
-    );
-  }
-  return (
-    <div className="flex h-full items-center justify-center bg-[radial-gradient(120%_120%_at_30%_20%,rgba(138,61,44,0.2),transparent_55%),radial-gradient(120%_120%_at_80%_90%,rgba(194,74,42,0.18),transparent_55%),#141010]">
-      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-        {type ?? "empty"}
-      </span>
-    </div>
-  );
-}
-
 export function DashboardProjects() {
   const { isAuthenticated } = useConvexAuth();
   const projects = useQuery(api.projects.list, isAuthenticated ? {} : "skip");
@@ -45,7 +25,7 @@ export function DashboardProjects() {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-56" />
+          <Skeleton key={i} className="h-44" />
         ))}
       </div>
     );
@@ -53,14 +33,14 @@ export function DashboardProjects() {
 
   if (projects.length === 0) {
     return (
-      <RevealOnScroll className="glow-ring rounded-2xl border border-border bg-card px-8 py-20 text-center">
-        <p className="font-display text-3xl">Nothing in the room yet</p>
+      <RevealOnScroll className="rounded-xl border border-border bg-card/70 px-8 py-20 text-center backdrop-blur-sm">
+        <p className="font-display text-3xl">No folders yet</p>
         <p className="mt-2 text-sm text-fg-dim">
-          Spin up a project, drop a cut, and send the link.
+          Create a project folder, drop media in, and share the review link.
         </p>
         <div className="mt-8 flex justify-center">
           <Button variant="accent" asChild>
-            <Link href="/projects/new">New project</Link>
+            <Link href="/projects/new">New folder</Link>
           </Button>
         </div>
       </RevealOnScroll>
@@ -78,18 +58,26 @@ export function DashboardProjects() {
               data-cursor
               className="block h-full"
             >
-              <article className="group h-full overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-border-strong hover:shadow-[0_16px_36px_-18px_rgba(194,74,42,0.28)]">
-                <div className="aspect-video overflow-hidden">
-                  <Thumb url={project.mediaUrl} type={project.mediaType} />
-                </div>
-                <div className="space-y-2 p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="truncate font-display text-lg">{project.title}</p>
-                    <Badge variant={status.variant}>{status.label}</Badge>
+              <article className="group relative h-full overflow-hidden rounded-xl border border-border bg-card/55 p-5 backdrop-blur-sm transition-all duration-300 hover:border-accent/40 hover:bg-card/75">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-border bg-secondary/80 font-display text-xl text-accent">
+                    ⌁
                   </div>
-                  <p className="font-mono text-[11px] text-muted-foreground">
-                    {formatRelativeTime(project.updatedAt, now)}
+                  <Badge variant={status.variant}>{status.label}</Badge>
+                </div>
+                <h2 className="mt-5 truncate font-display text-2xl leading-none">
+                  {project.title}
+                </h2>
+                {project.description && (
+                  <p className="mt-2 line-clamp-2 text-sm text-fg-dim">
+                    {project.description}
                   </p>
+                )}
+                <div className="mt-6 flex items-center justify-between font-mono text-[11px] text-muted-foreground">
+                  <span>
+                    {project.mediaCount} {project.mediaCount === 1 ? "file" : "files"}
+                  </span>
+                  <span>{formatRelativeTime(project.updatedAt, now)}</span>
                 </div>
               </article>
             </Link>

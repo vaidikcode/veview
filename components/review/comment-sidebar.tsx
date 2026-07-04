@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Id } from "@/convex/_generated/dataModel";
 import { captureAppException } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { cn, formatRelativeTime, formatTimestamp } from "@/lib/utils";
 
 export type ReviewComment = {
   _id: string;
+  mediaItemId?: Id<"mediaItems">;
   text: string;
   timestampSeconds?: number;
   pinX?: number;

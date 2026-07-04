@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 type KineticTextProps = {
   text: string;
   className?: string;
+  /** Applied to each character (e.g. `text-gradient` — must be on the glyph, not a parent). */
+  charClassName?: string;
   startDelay?: number;
   stagger?: number;
 };
@@ -10,6 +12,7 @@ type KineticTextProps = {
 export function KineticText({
   text,
   className,
+  charClassName,
   startDelay = 0,
   stagger = 55,
 }: KineticTextProps) {
@@ -26,7 +29,7 @@ export function KineticText({
           {word.split("").map((char, ci) => (
             <span
               key={`${char}-${ci}`}
-              className="rise"
+              className={cn("rise", charClassName)}
               style={
                 {
                   "--rise-delay": `${startDelay + (start + ci) * stagger}ms`,
@@ -36,7 +39,9 @@ export function KineticText({
               {char}
             </span>
           ))}
-          {wi < words.length - 1 && <span className="inline-block">&nbsp;</span>}
+          {wi < words.length - 1 && (
+            <span className={cn("inline-block", charClassName)}>&nbsp;</span>
+          )}
         </span>
       ))}
     </span>

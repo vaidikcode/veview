@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { query, type QueryCtx } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
 import { getProjectByShareToken } from "./lib/projects";
 import {
   authorTypeValidator,
@@ -13,13 +14,21 @@ const publicProjectValidator = v.object({
   title: v.string(),
   description: v.optional(v.string()),
   status: projectStatusValidator,
+});
+
+const publicMediaItemValidator = v.object({
+  _id: v.id("mediaItems"),
+  title: v.string(),
+  description: v.optional(v.string()),
   mediaType: v.optional(mediaTypeValidator),
-  mediaStatus: v.optional(mediaStatusValidator),
+  mediaStatus: mediaStatusValidator,
   mediaUrl: v.union(v.string(), v.null()),
+  fileName: v.optional(v.string()),
 });
 
 const publicCommentValidator = v.object({
   _id: v.id("comments"),
+  mediaItemId: v.optional(v.id("mediaItems")),
   text: v.string(),
   timestampSeconds: v.optional(v.number()),
   pinX: v.optional(v.number()),
@@ -29,48 +38,66 @@ const publicCommentValidator = v.object({
   createdAt: v.number(),
 });
 
+const reviewPayloadValidator = v.object({
+  project: publicProjectValidator,
+  mediaItems: v.array(publicMediaItemValidator),
+  comments: v.array(publicCommentValidator),
+});
+
+async function loadReviewPayload(ctx: QueryCtx, project: Doc<"projects">) {
+  const items = await ctx.db
+    .query("mediaItems")
+    .withIndex("by_project", (q) => q.eq("projectId", project._id))
+    .order("asc")
+    .collect();
+
+  const mediaItems = await Promise.all(
+    items.map(async (item) => ({
+      _id: item._id,
+      title: item.title,
+      description: item.description,
+      mediaType: item.mediaType,
+      mediaStatus: item.mediaStatus,
+      mediaUrl: item.storageId ? await ctx.storage.getUrl(item.storageId) : null,
+      fileName: item.fileName,
+    })),
+  );
+
+  const comments = await ctx.db
+    .query("comments")
+    .withIndex("by_project", (q) => q.eq("projectId", project._id))
+    .order("asc")
+    .collect();
+
+  return {
+    project: {
+      _id: project._id,
+      title: project.title,
+      description: project.description,
+      status: project.status,
+    },
+    mediaItems,
+    comments: comments.map((c) => ({
+      _id: c._id,
+      mediaItemId: c.mediaItemId,
+      text: c.text,
+      timestampSeconds: c.timestampSeconds,
+      pinX: c.pinX,
+      pinY: c.pinY,
+      authorType: c.authorType,
+      authorDisplayName: c.authorDisplayName,
+      createdAt: c.createdAt,
+    })),
+  };
+}
+
 export const getByShareToken = query({
   args: { shareToken: v.string() },
-  returns: v.union(
-    v.object({
-      project: publicProjectValidator,
-      comments: v.array(publicCommentValidator),
-    }),
-    v.null(),
-  ),
+  returns: v.union(reviewPayloadValidator, v.null()),
   handler: async (ctx, args) => {
     const project = await getProjectByShareToken(ctx, args.shareToken);
     if (!project) return null;
-
-    const comments = await ctx.db
-      .query("comments")
-      .withIndex("by_project", (q) => q.eq("projectId", project._id))
-      .order("asc")
-      .collect();
-
-    return {
-      project: {
-        _id: project._id,
-        title: project.title,
-        description: project.description,
-        status: project.status,
-        mediaType: project.mediaType,
-        mediaStatus: project.mediaStatus,
-        mediaUrl: project.mediaStorageId
-          ? await ctx.storage.getUrl(project.mediaStorageId)
-          : null,
-      },
-      comments: comments.map((c) => ({
-        _id: c._id,
-        text: c.text,
-        timestampSeconds: c.timestampSeconds,
-        pinX: c.pinX,
-        pinY: c.pinY,
-        authorType: c.authorType,
-        authorDisplayName: c.authorDisplayName,
-        createdAt: c.createdAt,
-      })),
-    };
+    return await loadReviewPayload(ctx, project);
   },
 });
 
@@ -79,6 +106,7 @@ export const getCreatorReview = query({
   returns: v.union(
     v.object({
       project: publicProjectValidator,
+      mediaItems: v.array(publicMediaItemValidator),
       comments: v.array(publicCommentValidator),
       shareToken: v.string(),
     }),
@@ -98,34 +126,9 @@ export const getCreatorReview = query({
     const project = await ctx.db.get("projects", args.projectId);
     if (!project || project.ownerId !== user._id) return null;
 
-    const comments = await ctx.db
-      .query("comments")
-      .withIndex("by_project", (q) => q.eq("projectId", project._id))
-      .order("asc")
-      .collect();
-
+    const payload = await loadReviewPayload(ctx, project);
     return {
-      project: {
-        _id: project._id,
-        title: project.title,
-        description: project.description,
-        status: project.status,
-        mediaType: project.mediaType,
-        mediaStatus: project.mediaStatus,
-        mediaUrl: project.mediaStorageId
-          ? await ctx.storage.getUrl(project.mediaStorageId)
-          : null,
-      },
-      comments: comments.map((c) => ({
-        _id: c._id,
-        text: c.text,
-        timestampSeconds: c.timestampSeconds,
-        pinX: c.pinX,
-        pinY: c.pinY,
-        authorType: c.authorType,
-        authorDisplayName: c.authorDisplayName,
-        createdAt: c.createdAt,
-      })),
+      ...payload,
       shareToken: project.shareToken,
     };
   },

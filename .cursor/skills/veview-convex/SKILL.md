@@ -14,14 +14,18 @@ description: Veview Convex patterns — schema, authedQuery vs public shareToken
 ## Tables
 
 - `users` — synced from Clerk via `users.ensureUser`
-- `projects` — `shareToken`, `linkRevoked`, media fields
-- `comments` — timestamp (video) or pinX/pinY (image)
+- `projects` — folders (`title`, `description`, `shareToken`, `status`)
+- `mediaItems` — files in a folder (`title`, `description`, storage, type/status)
+- `comments` — on a `mediaItemId` (timestamp for video, pinX/pinY for image)
 
-## File upload (3 steps)
+## File upload (per media item)
 
-1. `files.generateUploadUrl` (authed)
-2. Client POST file to URL → `{ storageId }`
-3. `files.setProjectMedia` with `contentType` validation
+1. `files.createMediaItem` (title + description)
+2. `files.generateUploadUrl`
+3. Client POST file → `{ storageId }`
+4. `files.finalizeMediaItem` with contentType, fileName, fileSizeBytes
+
+Any content type is accepted (`video` / `image` / `audio` / `file`).
 
 ## Rules
 
@@ -36,3 +40,4 @@ description: Veview Convex patterns — schema, authedQuery vs public shareToken
 - `convex/lib/customFunctions.ts` — authed wrappers
 - `convex/lib/projects.ts` — share token helpers
 - `convex/review.ts` — public `getByShareToken`
+- `convex/files.ts` — media item CRUD + upload finalize

@@ -13,6 +13,17 @@ import { VideoPlayer } from "@/components/review/video-player";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getGuestDisplayName, setGuestDisplayName } from "@/lib/guest";
 import { captureReviewEvent } from "@/lib/analytics";
+import { cn } from "@/lib/utils";
+
+type ReviewMediaItem = {
+  _id: Id<"mediaItems">;
+  title: string;
+  description?: string;
+  mediaType?: "video" | "image" | "audio" | "file";
+  mediaStatus: "uploading" | "ready" | "failed";
+  mediaUrl: string | null;
+  fileName?: string;
+};
 
 type ReviewData = {
   project: {
@@ -20,10 +31,8 @@ type ReviewData = {
     title: string;
     description?: string;
     status: "draft" | "awaiting_review" | "approved";
-    mediaType?: "video" | "image";
-    mediaStatus?: "uploading" | "ready" | "failed";
-    mediaUrl: string | null;
   };
+  mediaItems: ReviewMediaItem[];
   comments: ReviewComment[];
 };
 
@@ -44,6 +53,7 @@ export function ReviewWorkspace({
 }: ReviewWorkspaceProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
+  const [selectedMediaId, setSelectedMediaId] = useState<Id<"mediaItems"> | null>(null);
   const [displayName, setDisplayName] = useState(() =>
     mode === "creator" ? "Creator" : (getGuestDisplayName() ?? ""),
   );
@@ -56,6 +66,14 @@ export function ReviewWorkspace({
   const addGuestComment = useMutation(api.comments.addGuestComment);
   const addCreatorComment = useMutation(api.comments.addCreatorComment);
 
+  const readyMedia = useMemo(
+    () =>
+      (data?.mediaItems ?? []).filter(
+        (item) => item.mediaStatus === "ready" && item.mediaUrl,
+      ),
+    [data?.mediaItems],
+  );
+
   useEffect(() => {
     if (data?.project._id && mode === "guest") {
       captureReviewEvent("review_link_opened", {
@@ -65,27 +83,42 @@ export function ReviewWorkspace({
     }
   }, [data?.project._id, mode]);
 
+  const activeMediaId =
+    selectedMediaId && readyMedia.some((m) => m._id === selectedMediaId)
+      ? selectedMediaId
+      : (readyMedia[0]?._id ?? null);
+
+  const activeMedia = readyMedia.find((m) => m._id === activeMediaId) ?? null;
+
+  const mediaComments = useMemo(
+    () =>
+      (data?.comments ?? []).filter(
+        (c) => activeMedia && c.mediaItemId === activeMedia._id,
+      ),
+    [data?.comments, activeMedia],
+  );
+
   const videoMarkers = useMemo(
     () =>
-      (data?.comments ?? [])
+      mediaComments
         .filter((c) => c.timestampSeconds !== undefined)
         .map((c) => ({
           id: c._id,
           timestampSeconds: c.timestampSeconds!,
         })),
-    [data?.comments],
+    [mediaComments],
   );
 
   const imagePins = useMemo(
     () =>
-      (data?.comments ?? [])
+      mediaComments
         .filter((c) => c.pinX !== undefined && c.pinY !== undefined)
         .map((c) => ({
           id: c._id,
           pinX: c.pinX!,
           pinY: c.pinY!,
         })),
-    [data?.comments],
+    [mediaComments],
   );
 
   if (data === undefined) {
@@ -97,10 +130,18 @@ export function ReviewWorkspace({
     );
   }
 
-  if (!data || !data.project.mediaUrl) {
+  if (!data) {
     return (
       <div className="border border-dashed border-border py-20 text-center text-sm font-light text-muted-foreground">
-        {data === null ? "Invalid link" : "Media not ready"}
+        Invalid link
+      </div>
+    );
+  }
+
+  if (readyMedia.length === 0) {
+    return (
+      <div className="border border-dashed border-border py-20 text-center text-sm font-light text-muted-foreground">
+        No media ready for review in this folder.
       </div>
     );
   }
@@ -108,15 +149,17 @@ export function ReviewWorkspace({
   const handleSubmit = async (text: string) => {
     const name = displayName.trim();
     if (!name) throw new Error("Name required");
+    if (!activeMedia) throw new Error("Select media to comment on");
     setGuestDisplayName(name);
 
     if (mode === "guest") {
       if (!shareToken) throw new Error("Missing share token");
       await addGuestComment({
         shareToken,
+        mediaItemId: activeMedia._id,
         text,
         displayName: name,
-        timestampSeconds: data.project.mediaType === "video" ? currentTime : undefined,
+        timestampSeconds: activeMedia.mediaType === "video" ? currentTime : undefined,
         pinX: pendingPin?.pinX,
         pinY: pendingPin?.pinY,
       });
@@ -124,8 +167,9 @@ export function ReviewWorkspace({
       if (!projectId) throw new Error("Missing project");
       await addCreatorComment({
         projectId,
+        mediaItemId: activeMedia._id,
         text,
-        timestampSeconds: data.project.mediaType === "video" ? currentTime : undefined,
+        timestampSeconds: activeMedia.mediaType === "video" ? currentTime : undefined,
         pinX: pendingPin?.pinX,
         pinY: pendingPin?.pinY,
       });
@@ -134,50 +178,100 @@ export function ReviewWorkspace({
     setPendingPin(null);
     captureReviewEvent("comment_added", {
       project_id: data.project._id,
-      media_type: data.project.mediaType ?? "unknown",
-      has_timestamp: data.project.mediaType === "video",
+      media_type: activeMedia.mediaType ?? "unknown",
+      has_timestamp: activeMedia.mediaType === "video",
     });
   };
 
   const handleSelectComment = (comment: ReviewComment) => {
     setActiveCommentId(comment._id);
+    if (comment.mediaItemId && comment.mediaItemId !== activeMediaId) {
+      setSelectedMediaId(comment.mediaItemId);
+    }
     if (comment.timestampSeconds !== undefined) {
       setCurrentTime(comment.timestampSeconds);
       captureReviewEvent("comment_seeked", { project_id: data.project._id });
-    }
-    if (comment.pinX !== undefined && comment.pinY !== undefined) {
-      setActiveCommentId(comment._id);
     }
   };
 
   return (
     <div className="space-y-6">
       {header}
+
+      {readyMedia.length > 1 && (
+        <div className="flex flex-wrap gap-2">
+          {readyMedia.map((item) => (
+            <button
+              key={item._id}
+              type="button"
+              data-cursor
+              onClick={() => {
+                setSelectedMediaId(item._id);
+                setActiveCommentId(null);
+                setPendingPin(null);
+                setCurrentTime(0);
+              }}
+              className={cn(
+                "rounded-full border px-4 py-2 text-sm transition-colors",
+                item._id === activeMediaId
+                  ? "border-accent bg-accent/15 text-foreground"
+                  : "border-border text-fg-dim hover:border-border-strong hover:text-foreground",
+              )}
+            >
+              {item.title}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {activeMedia?.description && (
+        <p className="text-sm text-fg-dim">{activeMedia.description}</p>
+      )}
+
       <div className="grid min-h-[70vh] gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div>
-          {data.project.mediaType === "video" ? (
+          {activeMedia?.mediaType === "video" && activeMedia.mediaUrl ? (
             <VideoPlayer
-              src={data.project.mediaUrl}
+              src={activeMedia.mediaUrl}
               comments={videoMarkers}
               currentTime={currentTime}
               onTimeUpdate={setCurrentTime}
               onSeek={setCurrentTime}
             />
-          ) : (
+          ) : activeMedia?.mediaType === "image" && activeMedia.mediaUrl ? (
             <ImageReview
-              src={data.project.mediaUrl}
+              src={activeMedia.mediaUrl}
               pins={imagePins}
               pendingPin={pendingPin}
               activePinId={activeCommentId}
               onImageClick={(pinX, pinY) => setPendingPin({ pinX, pinY })}
               onPinClick={setActiveCommentId}
             />
-          )}
+          ) : activeMedia?.mediaUrl ? (
+            <div className="rounded-lg border border-border bg-card p-8 text-center">
+              <p className="font-display text-xl">{activeMedia.title}</p>
+              <p className="mt-2 text-sm text-fg-dim">
+                Preview isn&apos;t available for this file type. Download to review.
+              </p>
+              <a
+                href={activeMedia.mediaUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-block text-sm text-accent underline"
+              >
+                {activeMedia.fileName ?? "Open file"}
+              </a>
+            </div>
+          ) : null}
         </div>
         <CommentSidebar
-          comments={data.comments}
+          comments={mediaComments}
           currentTime={currentTime}
-          mediaType={data.project.mediaType}
+          mediaType={
+            activeMedia?.mediaType === "video" || activeMedia?.mediaType === "image"
+              ? activeMedia.mediaType
+              : undefined
+          }
           displayName={displayName}
           onDisplayNameChange={setDisplayName}
           onSubmit={handleSubmit}
