@@ -5,8 +5,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:vercel": "bash scripts/vercel-build.sh",
-    "deploy:convex": "convex deploy",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

@@ -20,7 +20,7 @@ type ShellProps = {
 export function AppShell({ children, cta }: ShellProps) {
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/70 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
           <Link href="/dashboard" data-cursor>
             <Wordmark />
