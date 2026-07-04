@@ -9,7 +9,7 @@ import { EnsureUser } from "@/components/ensure-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { captureProjectEvent } from "@/lib/analytics";
+import { captureAppException, captureProjectEvent } from "@/lib/analytics";
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -34,6 +34,7 @@ export default function NewProjectPage() {
       captureProjectEvent("project_created", { project_id: projectId });
       router.push(`/projects/${projectId}`);
     } catch (e) {
+      captureAppException(e, { context: "project_create" });
       setError(e instanceof Error ? e.message : "Could not create project");
     } finally {
       setLoading(false);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { captureAppException } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -59,6 +60,10 @@ export function CommentSidebar({
       await onSubmit(text.trim());
       setText("");
     } catch (e) {
+      captureAppException(e, {
+        context: "comment_submit",
+        media_type: mediaType ?? "unknown",
+      });
       setError(e instanceof Error ? e.message : "Failed to post");
     } finally {
       setSubmitting(false);

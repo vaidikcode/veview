@@ -18,6 +18,9 @@ export function PostHogIdentifier() {
         email: user.primaryEmailAddress?.emailAddress,
         name: user.fullName ?? undefined,
       });
+    } else {
+      // Clear identity on logout so errors aren't attributed to the previous user.
+      posthog.reset();
     }
   }, [user, isLoaded]);
 

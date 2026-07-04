@@ -29,6 +29,16 @@ Use `snake_case`. Capture from client via `lib/analytics.ts` (`posthog.capture`)
 
 - Creators: `posthog.identify(clerkUserId)` in `PostHogIdentifier`
 - Guests: anonymous (no identify unless email collected later)
+- Logout: `posthog.reset()` so errors aren’t attributed to the previous user
+
+## Error tracking
+
+- Client autocapture: `capture_exceptions` in `PostHogProvider` (`app/layout.tsx`)
+- Boundaries: `app/error.tsx`, `app/global-error.tsx` → `captureException`
+- Handled failures: `captureAppException` in `lib/analytics.ts` (upload, project create, comments)
+- Server: `instrumentation.ts` `onRequestError` + `lib/posthog-server.ts` (`posthog-node`)
+
+Always use `captureException` / `captureAppException` — never manual `$exception` events.
 
 ## Middleware
 

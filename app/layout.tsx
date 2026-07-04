@@ -52,6 +52,12 @@ export default function RootLayout({
               clientOptions={{
                 api_host: "/ingest",
                 ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+                // Unhandled errors + promise rejections → PostHog Error Tracking
+                capture_exceptions: {
+                  capture_unhandled_errors: true,
+                  capture_unhandled_rejections: true,
+                  capture_console_errors: false,
+                },
               }}
             >
               <Cursor />

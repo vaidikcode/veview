@@ -5,7 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { captureProjectEvent } from "@/lib/analytics";
+import { captureAppException, captureProjectEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const MAX_MB = 500;
@@ -70,6 +70,11 @@ export function MediaUpload({ projectId, compact }: MediaUploadProps) {
         file_size_mb: Math.round(sizeMb * 10) / 10,
       });
     } catch (e) {
+      captureAppException(e, {
+        context: "media_upload",
+        project_id: projectId,
+        media_type: file.type.startsWith("video/") ? "video" : "image",
+      });
       await markFailed({ projectId });
       setError(e instanceof Error ? e.message : "Upload failed");
     } finally {
