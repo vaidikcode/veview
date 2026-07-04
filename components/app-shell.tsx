@@ -6,7 +6,7 @@ import { clerkAppearance } from "@/lib/clerk-appearance";
 function Wordmark() {
   return (
     <span className="flex items-center gap-2 font-display text-lg tracking-tight">
-      <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent shadow-[0_0_14px_1px_rgba(255,106,44,0.9)]" />
+      <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent shadow-[0_0_12px_1px_rgba(194,74,42,0.45)]" />
       Veview
     </span>
   );

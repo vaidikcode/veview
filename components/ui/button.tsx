@@ -9,9 +9,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "rounded-full bg-foreground text-primary-foreground hover:shadow-[0_0_30px_-6px_rgba(255,106,44,0.6)]",
+          "rounded-full bg-foreground text-primary-foreground hover:shadow-[0_12px_28px_-12px_rgba(10,8,8,0.55)]",
         accent:
-          "rounded-full bg-accent text-[#07070a] hover:shadow-[0_0_36px_-6px_rgba(255,106,44,0.8)]",
+          "rounded-full bg-accent text-[#f2e8df] hover:shadow-[0_12px_28px_-10px_rgba(194,74,42,0.4)]",
         outline:
           "rounded-full border border-border-strong bg-transparent text-foreground hover:border-accent hover:text-accent",
         ghost: "rounded-full text-fg-dim hover:bg-secondary hover:text-foreground",

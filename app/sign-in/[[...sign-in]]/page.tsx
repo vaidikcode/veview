@@ -9,8 +9,8 @@ export default function SignInPage() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(50% 50% at 30% 20%, rgba(123,108,255,0.25), transparent 60%)," +
-            "radial-gradient(50% 50% at 80% 80%, rgba(255,106,44,0.22), transparent 60%)",
+            "radial-gradient(50% 50% at 30% 20%, rgba(138,61,44,0.2), transparent 60%)," +
+            "radial-gradient(50% 50% at 80% 80%, rgba(194,74,42,0.16), transparent 60%)",
         }}
       />
       <div className="pointer-events-none absolute inset-0 hairline-grid opacity-30" />

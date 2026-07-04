@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { AppShell } from "@/components/app-shell";
@@ -23,7 +23,8 @@ const statusMap = {
 export default function ProjectPage() {
   const params = useParams<{ id: string }>();
   const projectId = params.id as Id<"projects">;
-  const project = useQuery(api.projects.get, { projectId });
+  const { isAuthenticated } = useConvexAuth();
+  const project = useQuery(api.projects.get, isAuthenticated ? { projectId } : "skip");
 
   return (
     <AppShell>

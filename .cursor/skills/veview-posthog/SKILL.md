@@ -8,7 +8,7 @@ description: Veview PostHog analytics — EU host, event taxonomy, creator ident
 ## Config
 
 - Package: `@posthog/next`
-- Host: `https://eu.posthog.com` (project Studio / Mirelo)
+- Host: `https://eu.posthog.com` (Veview’s own PostHog project — key from env only)
 - Client proxy: `/ingest` via `postHogMiddleware({ proxy: true, host: 'https://eu.i.posthog.com' })`
 - Env: `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`
 

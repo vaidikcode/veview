@@ -11,13 +11,13 @@ const badgeVariants = cva(
         secondary: "border-border bg-secondary text-fg-dim",
         draft: "border-border bg-secondary text-fg-dim",
         review:
-          "border-[color-mix(in_oklab,var(--accent-2)_40%,transparent)] bg-[color-mix(in_oklab,var(--accent-2)_14%,transparent)] text-[#b3a9ff]",
+          "border-[color-mix(in_oklab,var(--accent-2)_40%,transparent)] bg-[color-mix(in_oklab,var(--accent-2)_14%,transparent)] text-[#d4a090]",
         approved:
-          "border-[color-mix(in_oklab,var(--accent-3)_40%,transparent)] bg-[color-mix(in_oklab,var(--accent-3)_14%,transparent)] text-[#4fe3c2]",
+          "border-[color-mix(in_oklab,var(--accent-3)_40%,transparent)] bg-[color-mix(in_oklab,var(--accent-3)_14%,transparent)] text-[#c4a078]",
         failed:
-          "border-[color-mix(in_oklab,var(--danger)_40%,transparent)] bg-[color-mix(in_oklab,var(--danger)_14%,transparent)] text-[#ff8a84]",
+          "border-[color-mix(in_oklab,var(--danger)_40%,transparent)] bg-[color-mix(in_oklab,var(--danger)_14%,transparent)] text-[#d48884]",
         accent:
-          "border-[color-mix(in_oklab,var(--accent)_40%,transparent)] bg-[color-mix(in_oklab,var(--accent)_14%,transparent)] text-[#ff9c6e]",
+          "border-[color-mix(in_oklab,var(--accent)_40%,transparent)] bg-[color-mix(in_oklab,var(--accent)_14%,transparent)] text-[#e0a090]",
       },
     },
     defaultVariants: { variant: "default" },

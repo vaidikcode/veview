@@ -2,31 +2,32 @@
 @import "../styles/transitions.css";
 
 :root {
-  --bg: #07070a;
-  --bg-elev: #101017;
-  --bg-panel: #0c0c12;
-  --fg: #f4f2ea;
-  --fg-dim: #9d9a90;
-  --muted: #7c7a72;
-  --border: rgba(244, 242, 234, 0.1);
-  --border-strong: rgba(244, 242, 234, 0.18);
-  --accent: #ff6a2c;
-  --accent-2: #7b6cff;
-  --accent-3: #14d1a3;
-  --danger: #ff5a52;
+  /* Dull red-orange on black */
+  --bg: #0a0808;
+  --bg-elev: #141010;
+  --bg-panel: #110e0d;
+  --fg: #e6ddd4;
+  --fg-dim: #8f847a;
+  --muted: #6e655c;
+  --border: rgba(230, 221, 212, 0.09);
+  --border-strong: rgba(230, 221, 212, 0.16);
+  --accent: #c24a2a;
+  --accent-2: #8a3d2c;
+  --accent-3: #9a6b4a;
+  --danger: #b83a34;
 
   --background: var(--bg);
   --foreground: var(--fg);
   --card: var(--bg-panel);
   --card-foreground: var(--fg);
   --primary: var(--fg);
-  --primary-foreground: #07070a;
+  --primary-foreground: #0a0808;
   --secondary: var(--bg-elev);
   --secondary-foreground: var(--fg);
   --muted-foreground: var(--muted);
-  --accent-foreground: var(--fg);
+  --accent-foreground: #f2e8df;
   --destructive: var(--danger);
-  --destructive-foreground: #07070a;
+  --destructive-foreground: #f2e8df;
   --ring: var(--accent);
   --surface: var(--bg-elev);
 }
@@ -85,7 +86,7 @@ body {
 
 ::selection {
   background: var(--accent);
-  color: #07070a;
+  color: #f2e8df;
 }
 
 /* Film grain overlay */
@@ -185,9 +186,9 @@ body::after {
 .text-gradient {
   background: linear-gradient(
     100deg,
-    var(--fg) 20%,
-    var(--accent) 60%,
-    var(--accent-2) 90%
+    var(--fg) 15%,
+    var(--accent) 55%,
+    var(--accent-2) 95%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -195,15 +196,15 @@ body::after {
 }
 
 .glass {
-  background: color-mix(in oklab, var(--bg-panel) 78%, transparent);
-  backdrop-filter: blur(16px) saturate(1.2);
+  background: color-mix(in oklab, var(--bg-panel) 82%, transparent);
+  backdrop-filter: blur(16px) saturate(0.9);
   border: 1px solid var(--border);
 }
 
 .glow-ring {
   box-shadow:
     0 0 0 1px var(--border),
-    0 0 40px -12px color-mix(in oklab, var(--accent) 55%, transparent);
+    0 0 36px -14px color-mix(in oklab, var(--accent) 35%, transparent);
 }
 
 .hairline-grid {

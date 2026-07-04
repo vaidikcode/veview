@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { EnsureUser } from "@/components/ensure-user";
@@ -14,7 +14,11 @@ import { captureProjectEvent } from "@/lib/analytics";
 export default function CreatorReviewPage() {
   const params = useParams<{ id: string }>();
   const projectId = params.id as Id<"projects">;
-  const data = useQuery(api.review.getCreatorReview, { projectId });
+  const { isAuthenticated } = useConvexAuth();
+  const data = useQuery(
+    api.review.getCreatorReview,
+    isAuthenticated ? { projectId } : "skip",
+  );
 
   return (
     <EnsureUser>

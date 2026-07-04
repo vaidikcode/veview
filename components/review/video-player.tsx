@@ -87,7 +87,7 @@ export function VideoPlayer({
               <button
                 key={c.id}
                 type="button"
-                className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_10px_1px_rgba(255,106,44,0.8)]"
+                className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_10px_1px_rgba(194,74,42,0.45)]"
                 style={{ left: `${(c.timestampSeconds / duration) * 100}%` }}
                 onClick={(e) => {
                   e.stopPropagation();

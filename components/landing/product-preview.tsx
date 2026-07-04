@@ -29,14 +29,14 @@ export function ProductPreview() {
 
       <div className="grid md:grid-cols-[1.4fr_1fr]">
         <div className="relative border-b border-border p-5 md:border-b-0 md:border-r">
-          <div className="relative aspect-video overflow-hidden rounded-xl border border-border bg-[radial-gradient(120%_120%_at_20%_10%,rgba(123,108,255,0.35),transparent_55%),radial-gradient(120%_120%_at_90%_80%,rgba(255,106,44,0.35),transparent_55%),#0a0a0f]">
+          <div className="relative aspect-video overflow-hidden rounded-xl border border-border bg-[radial-gradient(120%_120%_at_20%_10%,rgba(138,61,44,0.28),transparent_55%),radial-gradient(120%_120%_at_90%_80%,rgba(194,74,42,0.22),transparent_55%),#0a0808]">
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="flex h-14 w-14 items-center justify-center rounded-full border border-border-strong bg-black/30 backdrop-blur">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full border border-border-strong bg-black/40 backdrop-blur">
                 <span className="ml-1 h-0 w-0 border-y-8 border-l-[13px] border-y-transparent border-l-foreground" />
               </span>
             </div>
             <div className="absolute left-[26%] top-1/2 -translate-y-1/2">
-              <span className="block h-3 w-3 rounded-full bg-accent shadow-[0_0_18px_2px_rgba(255,106,44,0.8)]" />
+              <span className="block h-3 w-3 rounded-full bg-accent shadow-[0_0_18px_2px_rgba(194,74,42,0.45)]" />
             </div>
           </div>
           <div className="mt-4">

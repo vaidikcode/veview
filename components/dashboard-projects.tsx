@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { RevealOnScroll } from "@/components/motion/reveal-on-scroll";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,7 @@ function Thumb({ url, type }: { url: string | null; type?: "video" | "image" }) 
     );
   }
   return (
-    <div className="flex h-full items-center justify-center bg-[radial-gradient(120%_120%_at_30%_20%,rgba(123,108,255,0.25),transparent_55%),radial-gradient(120%_120%_at_80%_90%,rgba(255,106,44,0.25),transparent_55%)]">
+    <div className="flex h-full items-center justify-center bg-[radial-gradient(120%_120%_at_30%_20%,rgba(138,61,44,0.2),transparent_55%),radial-gradient(120%_120%_at_80%_90%,rgba(194,74,42,0.18),transparent_55%),#141010]">
       <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
         {type ?? "empty"}
       </span>
@@ -37,7 +37,8 @@ function Thumb({ url, type }: { url: string | null; type?: "video" | "image" }) 
 }
 
 export function DashboardProjects() {
-  const projects = useQuery(api.projects.list);
+  const { isAuthenticated } = useConvexAuth();
+  const projects = useQuery(api.projects.list, isAuthenticated ? {} : "skip");
   const [now] = useState(() => Date.now());
 
   if (projects === undefined) {
@@ -77,7 +78,7 @@ export function DashboardProjects() {
               data-cursor
               className="block h-full"
             >
-              <article className="group h-full overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-border-strong hover:shadow-[0_0_40px_-16px_rgba(255,106,44,0.6)]">
+              <article className="group h-full overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-border-strong hover:shadow-[0_16px_36px_-18px_rgba(194,74,42,0.28)]">
                 <div className="aspect-video overflow-hidden">
                   <Thumb url={project.mediaUrl} type={project.mediaType} />
                 </div>
