@@ -53,7 +53,6 @@ export default function RootLayout({
                 api_host: "/ingest",
                 ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
               }}
-              bootstrapFlags
             >
               <Cursor />
               <Suspense fallback={null}>
