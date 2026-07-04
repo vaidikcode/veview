@@ -24,31 +24,26 @@ const features = [
     k: "01",
     title: "Frame-accurate notes",
     body: "Comments pin to a timestamp or an exact point on the image. No more “around the 30 second mark.”",
-    span: "md:col-span-3",
   },
   {
     k: "02",
     title: "One link, zero logins",
     body: "Clients open a URL and start marking up. Nothing to install, no account to create.",
-    span: "md:col-span-3",
   },
   {
     k: "03",
     title: "Video & stills",
     body: "Drop an MP4 or a JPG. Same review room, same shortcuts.",
-    span: "md:col-span-2",
   },
   {
     k: "04",
     title: "Live threads",
     body: "Feedback streams in the moment it lands, synced across everyone watching.",
-    span: "md:col-span-2",
   },
   {
     k: "05",
     title: "Approve & ship",
     body: "One tap moves a cut from in-review to approved.",
-    span: "md:col-span-2",
   },
 ];
 
@@ -148,33 +143,34 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* FEATURES BENTO */}
+        {/* FEATURES — editorial list, no cards */}
         <section className="px-5 pb-28">
           <div className="mx-auto max-w-5xl">
-            <RevealOnScroll className="mb-10">
+            <RevealOnScroll className="mb-12 md:mb-16">
               <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-accent">
                 What you get
               </p>
-              <h2 className="mt-3 font-display text-4xl md:text-5xl">
+              <h2 className="mt-3 max-w-2xl font-display text-4xl md:text-5xl">
                 Built for the last mile of a project.
               </h2>
             </RevealOnScroll>
 
-            <div className="grid gap-3 md:grid-cols-6">
+            <div className="border-t border-border-strong">
               {features.map((f, i) => (
-                <RevealOnScroll key={f.k} delay={i * 70} className={f.span}>
+                <RevealOnScroll key={f.k} delay={i * 60}>
                   <article
                     data-cursor
-                    className="group h-full rounded-2xl border border-border bg-card p-6 transition-colors hover:border-border-strong"
+                    className="group grid gap-3 border-b border-border py-8 transition-colors md:grid-cols-[5rem_1fr_1.1fr] md:items-baseline md:gap-10 md:py-10"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs text-muted-foreground">
-                        {f.k}
-                      </span>
-                      <span className="h-2 w-2 rounded-full bg-border-strong transition-colors group-hover:bg-accent" />
-                    </div>
-                    <h3 className="mt-6 font-display text-2xl">{f.title}</h3>
-                    <p className="mt-2 text-sm text-fg-dim">{f.body}</p>
+                    <span className="font-mono text-xs tracking-[0.18em] text-accent/80 transition-colors group-hover:text-accent">
+                      {f.k}
+                    </span>
+                    <h3 className="font-display text-2xl leading-none tracking-tight md:text-3xl">
+                      {f.title}
+                    </h3>
+                    <p className="max-w-md text-sm leading-relaxed text-fg-dim md:justify-self-end md:text-right">
+                      {f.body}
+                    </p>
                   </article>
                 </RevealOnScroll>
               ))}
