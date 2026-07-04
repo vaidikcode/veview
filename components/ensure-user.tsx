@@ -5,8 +5,12 @@ import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
+/**
+ * Syncs the Clerk user into Convex, then renders children.
+ * Uses Clerk (not Convex) for sign-out redirects so auth lag can't kick users home.
+ */
 export function EnsureUser({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { userId, isLoaded: clerkLoaded } = useAuth();
@@ -14,14 +18,19 @@ export function EnsureUser({ children }: { children: React.ReactNode }) {
   const ensureUser = useMutation(api.users.ensureUser);
   const [readyUserId, setReadyUserId] = useState<string | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [timedOut, setTimedOut] = useState(false);
 
-  // Only redirect when Clerk confirms there is no session.
-  // Do not use Convex isAuthenticated here — it can lag and kick signed-in users home.
   useEffect(() => {
     if (clerkLoaded && !userId) {
       router.replace("/sign-in");
     }
   }, [clerkLoaded, userId, router]);
+
+  useEffect(() => {
+    if (!userId) return;
+    const timer = window.setTimeout(() => setTimedOut(true), 10_000);
+    return () => window.clearTimeout(timer);
+  }, [userId]);
 
   useEffect(() => {
     if (!userId || !isAuthenticated) return;
@@ -33,6 +42,7 @@ export function EnsureUser({ children }: { children: React.ReactNode }) {
         if (!cancelled) {
           setReadyUserId(userId);
           setSyncError(null);
+          setTimedOut(false);
         }
       })
       .catch((error: unknown) => {
@@ -48,53 +58,86 @@ export function EnsureUser({ children }: { children: React.ReactNode }) {
     };
   }, [ensureUser, isAuthenticated, userId]);
 
-  if (!clerkLoaded || (userId && (convexLoading || !isAuthenticated))) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <Skeleton className="h-8 w-48" />
-      </div>
-    );
+  const retry = () => {
+    if (!userId || !isAuthenticated) return;
+    setSyncError(null);
+    setTimedOut(false);
+    setReadyUserId(null);
+    void ensureUser()
+      .then(() => setReadyUserId(userId))
+      .catch((error: unknown) => {
+        setSyncError(
+          error instanceof Error ? error.message : "Could not sync your account",
+        );
+      });
+  };
+
+  if (!clerkLoaded) {
+    return <StatusPanel title="Loading…" body="Checking your session." />;
   }
 
   if (!userId) {
     return null;
   }
 
-  if (readyUserId !== userId) {
-    if (syncError) {
-      return (
-        <div className="mx-auto flex min-h-[40vh] max-w-md flex-col items-center justify-center px-5 text-center">
-          <p className="font-display text-2xl">Couldn’t open your workspace</p>
-          <p className="mt-2 text-sm text-fg-dim">{syncError}</p>
-          <button
-            type="button"
-            className="mt-6 rounded-full bg-accent px-5 py-2 text-sm text-accent-foreground"
-            onClick={() => {
-              setSyncError(null);
-              setReadyUserId(null);
-              void ensureUser()
-                .then(() => setReadyUserId(userId))
-                .catch((error: unknown) => {
-                  setSyncError(
-                    error instanceof Error
-                      ? error.message
-                      : "Could not sync your account",
-                  );
-                });
-            }}
-          >
-            Try again
-          </button>
-        </div>
-      );
-    }
+  if (readyUserId === userId) {
+    return <>{children}</>;
+  }
 
+  if (syncError) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <Skeleton className="h-8 w-48" />
-      </div>
+      <StatusPanel
+        title="Couldn’t open your workspace"
+        body={syncError}
+        actionLabel="Try again"
+        onAction={retry}
+      />
     );
   }
 
-  return <>{children}</>;
+  if (timedOut && (!isAuthenticated || convexLoading)) {
+    return (
+      <StatusPanel
+        title="Still connecting…"
+        body="Convex auth is taking too long. Confirm NEXT_PUBLIC_CONVEX_URL points at the deployment where you ran npx convex deploy, then retry."
+        actionLabel="Try again"
+        onAction={retry}
+      />
+    );
+  }
+
+  return (
+    <StatusPanel
+      title="Opening workspace…"
+      body={
+        convexLoading || !isAuthenticated
+          ? "Connecting to Convex…"
+          : "Syncing your account…"
+      }
+    />
+  );
+}
+
+function StatusPanel({
+  title,
+  body,
+  actionLabel,
+  onAction,
+}: {
+  title: string;
+  body: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-center px-5 text-center">
+      <p className="font-display text-3xl text-white">{title}</p>
+      <p className="mt-3 text-sm leading-relaxed text-white/70">{body}</p>
+      {actionLabel && onAction && (
+        <Button type="button" variant="accent" className="mt-8" onClick={onAction}>
+          {actionLabel}
+        </Button>
+      )}
+    </div>
+  );
 }

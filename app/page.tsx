@@ -75,14 +75,10 @@ export default async function HomePage() {
               The review room for people who make things move
             </div>
 
-            <h1 className="font-display text-[clamp(2.4rem,7.5vw,6.5rem)] leading-[0.95]">
+            <h1 className="font-display text-[clamp(2.4rem,7.5vw,6.5rem)] leading-[0.95] text-white">
               <KineticText text="Feedback that" />
               <br />
-              <KineticText
-                text="hits the frame."
-                startDelay={520}
-                charClassName="text-gradient"
-              />
+              <KineticText text="hits the frame." startDelay={520} />
             </h1>
 
             <p className="mt-7 max-w-xl text-lg text-fg-dim">

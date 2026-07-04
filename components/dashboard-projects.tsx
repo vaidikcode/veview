@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { MacFolderIcon } from "@/components/icons/mac-folder";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { formatRelativeTime } from "@/lib/utils";
 
 const statusMap = {
@@ -16,15 +16,27 @@ const statusMap = {
 };
 
 export function DashboardProjects() {
-  const { isAuthenticated } = useConvexAuth();
+  const { isAuthenticated, isLoading } = useConvexAuth();
   const projects = useQuery(api.projects.list, isAuthenticated ? {} : "skip");
   const [now] = useState(() => Date.now());
 
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="rounded-xl border border-white/15 bg-black/50 px-8 py-16 text-center">
+        <p className="font-display text-2xl text-white">Connecting…</p>
+        <p className="mt-2 text-sm text-white/65">Loading your folders.</p>
+      </div>
+    );
+  }
+
   if (projects === undefined) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-44" />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-48 animate-pulse rounded-2xl border border-white/15 bg-white/10"
+          />
         ))}
       </div>
     );
@@ -32,9 +44,12 @@ export function DashboardProjects() {
 
   if (projects.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-card/90 px-8 py-20 text-center shadow-lg backdrop-blur-sm">
-        <p className="font-display text-3xl text-foreground">No folders yet</p>
-        <p className="mt-2 text-sm text-fg-dim">
+      <div className="rounded-2xl border border-white/15 bg-black/55 px-8 py-16 text-center shadow-xl backdrop-blur-md">
+        <div className="flex justify-center">
+          <MacFolderIcon size={72} />
+        </div>
+        <p className="mt-6 font-display text-3xl text-white">No folders yet</p>
+        <p className="mt-2 text-sm text-white/65">
           Create a project folder, drop media in, and share the review link.
         </p>
         <div className="mt-8 flex justify-center">
@@ -47,37 +62,37 @@ export function DashboardProjects() {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {projects.map((project) => {
         const status = statusMap[project.status];
         return (
           <Link
             key={project._id}
             href={`/projects/${project._id}`}
-            data-cursor
-            className="block h-full"
+            className="block h-full rounded-2xl outline-none ring-offset-2 ring-offset-background focus-visible:ring-2 focus-visible:ring-accent"
           >
-            <article className="group relative h-full overflow-hidden rounded-xl border border-border bg-card/90 p-5 shadow-lg backdrop-blur-sm transition-all duration-300 hover:border-accent/40 hover:bg-card">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-border bg-secondary font-display text-xl text-accent">
-                  ⌁
-                </div>
-                <Badge variant={status.variant}>{status.label}</Badge>
-              </div>
-              <h2 className="mt-5 truncate font-display text-2xl leading-none text-foreground">
+            <article className="group flex h-full flex-col items-center rounded-2xl border border-white/12 bg-black/50 px-5 py-8 text-center shadow-xl backdrop-blur-md transition-transform duration-200 hover:-translate-y-1 hover:border-white/25 hover:bg-black/65">
+              <MacFolderIcon
+                size={88}
+                className="transition-transform duration-200 group-hover:scale-105"
+              />
+              <h2 className="mt-5 w-full truncate font-display text-xl text-white">
                 {project.title}
               </h2>
               {project.description && (
-                <p className="mt-2 line-clamp-2 text-sm text-fg-dim">
+                <p className="mt-2 line-clamp-2 text-sm text-white/60">
                   {project.description}
                 </p>
               )}
-              <div className="mt-6 flex items-center justify-between font-mono text-[11px] text-muted-foreground">
-                <span>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <Badge variant={status.variant}>{status.label}</Badge>
+                <span className="font-mono text-[11px] text-white/50">
                   {project.mediaCount} {project.mediaCount === 1 ? "file" : "files"}
                 </span>
-                <span>{formatRelativeTime(project.updatedAt, now)}</span>
               </div>
+              <p className="mt-3 font-mono text-[11px] text-white/40">
+                {formatRelativeTime(project.updatedAt, now)}
+              </p>
             </article>
           </Link>
         );
