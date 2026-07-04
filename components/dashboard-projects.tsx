@@ -69,28 +69,28 @@ export function DashboardProjects() {
           <Link
             key={project._id}
             href={`/projects/${project._id}`}
-            className="block h-full rounded-2xl outline-none ring-offset-2 ring-offset-background focus-visible:ring-2 focus-visible:ring-accent"
+            className="group block h-full rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
-            <article className="group flex h-full flex-col items-center rounded-2xl border border-white/12 bg-black/50 px-5 py-8 text-center shadow-xl backdrop-blur-md transition-transform duration-200 hover:-translate-y-1 hover:border-white/25 hover:bg-black/65">
+            <article className="flex h-full flex-col items-center px-2 py-4 text-center transition-transform duration-200 hover:-translate-y-1">
               <MacFolderIcon
-                size={88}
+                size={96}
                 className="transition-transform duration-200 group-hover:scale-105"
               />
-              <h2 className="mt-5 w-full truncate font-display text-xl text-white">
+              <h2 className="mt-4 w-full truncate font-display text-xl text-white">
                 {project.title}
               </h2>
               {project.description && (
-                <p className="mt-2 line-clamp-2 text-sm text-white/60">
+                <p className="mt-1 line-clamp-2 text-sm text-white/60">
                   {project.description}
                 </p>
               )}
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                 <Badge variant={status.variant}>{status.label}</Badge>
                 <span className="font-mono text-[11px] text-white/50">
                   {project.mediaCount} {project.mediaCount === 1 ? "file" : "files"}
                 </span>
               </div>
-              <p className="mt-3 font-mono text-[11px] text-white/40">
+              <p className="mt-2 font-mono text-[11px] text-white/40">
                 {formatRelativeTime(project.updatedAt, now)}
               </p>
             </article>

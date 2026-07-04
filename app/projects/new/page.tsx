@@ -58,8 +58,8 @@ export default function NewProjectPage() {
     <AppShell>
       <EnsureUser>
         <div className="mx-auto max-w-lg px-5 py-16">
-          <div className="mb-6 flex justify-center">
-            <MacFolderIcon size={80} />
+          <div className="mb-6 flex justify-center bg-transparent">
+            <MacFolderIcon size={88} />
           </div>
           <p className="text-center font-mono text-[11px] uppercase tracking-[0.2em] text-accent">
             New folder

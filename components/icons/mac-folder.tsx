@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 
-/** Classic macOS-style folder glyph. */
+/** macOS-style folder in Veview dull orange-red. */
 export function MacFolderIcon({
   className,
   size = 64,
@@ -23,7 +23,7 @@ export function MacFolderIcon({
       viewBox="0 0 64 52"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("shrink-0 drop-shadow-md", className)}
+      className={cn("shrink-0 drop-shadow-[0_8px_16px_rgba(10,8,8,0.45)]", className)}
       aria-hidden
     >
       <path
@@ -47,8 +47,8 @@ export function MacFolderIcon({
           y2="50"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#7EC8F8" />
-          <stop offset="1" stopColor="#3B9EE5" />
+          <stop stopColor="#C46A4A" />
+          <stop offset="1" stopColor="#8A3D2C" />
         </linearGradient>
         <linearGradient
           id={front}
@@ -58,8 +58,8 @@ export function MacFolderIcon({
           y2="50"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#5BB6F0" />
-          <stop offset="1" stopColor="#2B8FD4" />
+          <stop stopColor="#C24A2A" />
+          <stop offset="1" stopColor="#6E2F22" />
         </linearGradient>
         <linearGradient
           id={tab}
@@ -69,8 +69,8 @@ export function MacFolderIcon({
           y2="12"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#A8DBFA" />
-          <stop offset="1" stopColor="#6EBEF0" />
+          <stop stopColor="#D4896A" />
+          <stop offset="1" stopColor="#A85238" />
         </linearGradient>
       </defs>
     </svg>
